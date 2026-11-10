@@ -1,0 +1,11 @@
+name: deep-research
+source: https://github.com/Imbad0202/academic-research-skills
+source_revision: 3.24.1
+license: CC BY-NC 4.0
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Vendored at the user's request, including shared/ and scripts/ dependencies.
+  Non-commercial restriction applies. Outputs go under research/; the task
+  contract and measured evidence are authoritative. Not covered by KDA's
+  first-party license.

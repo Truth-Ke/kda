@@ -1,0 +1,8 @@
+name: kernel-triton-writing
+source: https://github.com/NVIDIA/TensorRT-LLM
+source_revision: 00b59a491841aa72b5d704d2b5f709f13a846277
+license: Apache-2.0
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Contract oracle and reference are frozen. Do not adjust reference TF32 or tolerances to make a candidate pass. scripts/ are helpers, not the contract oracle.

@@ -1,16 +1,33 @@
 # Kernel Design Agents
 
-Kernel Design Agents (KDA) is an agent-centric workflow for using coding agents to research, implement, verify, and iterate on performance-sensitive CUDA kernel tasks.
+Kernel Design Agents (KDA) is an agent-centric workflow for using coding agents to research, implement, verify, and iterate on performance-sensitive kernel and operator tasks. It is intentionally independent of a single hardware vendor, language, or benchmark suite; a task contract supplies those choices.
 
 This repository documents an early research prototype and remains under active development. Community feedback and contributions are welcome. If you are interested in HAN Lab Mafia's solutions ranking #1–3 on tracks at the MLSys Kernel Contest, see [mit-han-lab/mlsys2026-flashinfer-contest](https://github.com/mit-han-lab/mlsys2026-flashinfer-contest) for performance evaluation and reproduction.
+
+**Agents: read [How Claude Uses KDA](#how-claude-uses-kda) first.** It is the runtime contract for task workspaces.
 
 ## Contents
 
 | Path | Purpose |
 |---|---|
 | `docs/agent-flow.md` | Minimal end-to-end KDA workflow. |
+| `docs/round-engine.md` | Round 0, candidates, FAST/CONFIRM/FULL, ranking, promotion, budget, checkpoints. |
+| `docs/evidence-model.md` | Task contract fields, evidence records, ranking states, snapshots, recovery. |
+| `docs/research-protocol.md` | Local/Targeted/Deep research, source grading, fallback, representation choices. |
+| `docs/skill-routing.md` | Which vendored skill to load for which situation. |
+| `docs/agent-runtime.md` | Startup sequence, phase gates, main-agent/subagent policy, and skill loading mechanics. |
 | `prompts/README.md` | How to use prompt templates. |
 | `prompts/basic-flow.md` | Generic starter prompt for a new task. |
+| `prompts/research-first.md` | Round 0 research prompt. |
+| `prompts/round-loop.md` | Generic one-round prompt. |
+| `templates/task-workspace/` | Task workspace skeleton. |
+| `scripts/install_skills.py` | Install vendored skills into `.claude/skills/`. |
+| `scripts/new_task.py` | Create a task workspace from the template. |
+| `scripts/rank_round.py` | Rank a round and gate champion promotion. |
+| `scripts/summarize_round.py` | Render `round_results.md`. |
+| `scripts/check_evidence.py` | Advisory evidence warnings. |
+| `scripts/capture_run.py` | Capture a command into `runs/<run_id>/`. |
+| `skills/` | Vendored skills with source and license records. |
 | `CLAUDE.md` | Repository-facing agent instructions. |
 | `CONTRIBUTING.md` | Contribution process and DCO sign-off requirements. |
 | `THIRD_PARTY_NOTICES.md` | Third-party component and license disclosures. |
@@ -26,22 +43,111 @@ Have a kernel that needs optimization? [Submit a request](https://github.com/NVl
 Install the agent workflow dependencies before starting the agent session:
 
 ```bash
-git clone --recurse-submodules https://github.com/mit-han-lab/kernel-design-agents.git
-cd kernel-design-agents
+git clone --recurse-submodules https://github.com/NVlabs/kda.git
+cd kda
 
-# link skills
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/skills/ncu-report-skill" ~/.claude/skills/ncu-report-skill
-ln -s "$(pwd)/skills/KernelWiki" ~/.claude/skills/KernelWiki
+# install the vendored skills into this repository's .claude/skills/
+python3 scripts/install_skills.py --target .
 
-# or clone the independently licensed ncu skill directly
-mkdir -p ~/.claude/skills && cd ~/.claude/skills
-git clone https://github.com/mit-han-lab/ncu-report-skill.git
+# create a separate task workspace and install the same skills there
+python3 scripts/new_task.py /path/to/task-workspace --task-name my-kernel
 ```
+
+`.claude/skills/` is a local installation artifact and is ignored by git. Use
+`--copy` with `install_skills.py` when symlinks are not available.
 
 Use KernelWiki from this repository's pinned submodule. A direct upstream
 checkout may contain artifact snapshots governed by additional terms that are
 omitted from this distribution.
+
+## How Claude Uses KDA
+
+This section is the runtime contract for an agent working in a task workspace.
+
+### 1. Read before acting
+
+In the task workspace, read in this order:
+
+1. `CLAUDE.md` (task instructions and skill gates).
+2. `contracts/task.yaml` (objective, workloads, oracle, metric, promotion,
+   budget).
+3. `state.json` (stage, round, next action).
+4. `docs/handoff.md` (previous session; read the file directly, do not invoke
+   the handoff skill at startup).
+5. `docs/process_log.md` and `skills.lock.json`.
+
+### 2. Install skills once
+
+```bash
+# create a task workspace from the template (also installs skills)
+python3 /path/to/kda/scripts/new_task.py /path/to/task-workspace --task-name my-kernel
+
+# or install into an existing workspace
+python3 /path/to/kda/scripts/install_skills.py --target .
+```
+
+This creates `.claude/skills/<name>` and `skills.lock.json`. All vendored
+skills are model-loadable; load only the one for the current phase. If a
+scoped name such as `kda:code-review` fails, use the unscoped name
+(`code-review`).
+
+### 3. Load skills on demand
+
+| Phase | Load |
+|---|---|
+| Round 0 research | `research`, `deep-research`, `KernelWiki`, `perf-optimization-casebook` |
+| Candidate implementation | `kernel-triton-writing`, `kernel-cute-writing`, or `triton-kernels`; `implement`/`tdd` for code changes |
+| Debug/regression | `diagnosing-bugs` |
+| Profiling | `ncu-report-skill` |
+| Review | `code-review` |
+| Planning/decisions | `wayfinder`, `to-spec`, `to-tickets`, `grilling`, `domain-modeling`, `prototype`, `codebase-design`, `grill-me` |
+| Session close | `handoff` |
+| Phase close | `retro` |
+| Documentation | `writing-for-agents` |
+
+Do not load every skill at startup. A skill is reference, not authority: the
+task contract, independent oracle, and measured evidence win.
+
+### 4. Run the loop
+
+```bash
+# capture a measured run (creates runs/<run_id>/)
+python3 /path/to/kda/scripts/capture_run.py --run-id <id> --code src -- <command>
+
+# rank the round and gate promotion
+python3 /path/to/kda/scripts/rank_round.py --workspace .
+
+# render the report
+python3 /path/to/kda/scripts/summarize_round.py --workspace .
+
+# optional advisory evidence check
+python3 /path/to/kda/scripts/check_evidence.py --workspace .
+
+# promote only after FULL, full validation, traceable runs and a real gain
+python3 /path/to/kda/scripts/rank_round.py --workspace . --promote <candidate> --run-id <run>
+```
+
+Use `FAST` for exploration, `CONFIRM` for interleaved comparison, and `FULL`
+for the contract's full workload set. Only `FULL` candidates can be promoted.
+The first promotion is compared against the traceable baseline when no
+champion exists.
+
+### 5. Record the process
+
+Keep `docs/process_log.md` brief (decisions, reasoning, failures, next step),
+append key actions to `runs/<run_id>/agent_trace.jsonl`, and let
+`capture_run.py` write `usage.json`. Subagents return findings; the main agent
+records what they did and owns promotion.
+
+### 6. Boundaries
+
+- Do not change the oracle, tolerance, or workload set to make a candidate
+  pass.
+- Do not hand-write scores or promote incomplete/FAST-only candidates.
+- Do not assume a hardware vendor, language, or benchmark; the contract
+  supplies them.
+- `deep-research` defaults to `three-way-scan`/`lit-review` for mechanism
+  scans; use full report mode only when the user asks.
 
 ## Submodules
 
@@ -54,6 +160,18 @@ The following third-party projects are included as Git submodules. The source UR
 
 These submodules are not covered by this repository's first-party license. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the applicable license text and additional details.
 
+## Vendored Skills
+
+`skills/` also contains vendored behavior and kernel skills. They are not
+covered by KDA's first-party license; each directory keeps its own `LICENSE`,
+`SOURCE.yaml`, and `ADAPTATION.md`. See [skills/README.md](skills/README.md)
+for the inventory and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for
+license details.
+
+The `deep-research` skill is **CC BY-NC 4.0** (non-commercial) and is not
+covered by KDA's Apache-2.0/CC-BY-4.0 terms. Downstream users must preserve
+its license and attribution.
+
 Install the `humanize` Claude Code plugin from the Claude Code plugin UI:
 
 ```text
@@ -64,15 +182,18 @@ Install the `humanize` Claude Code plugin from the Claude Code plugin UI:
 ## Minimal Flow
 
 1. Create a separate implementation workspace for the target task.
-2. Define the task contract: objective, constraints, validation command, and promotion criteria.
+2. Define the task contract: objective, constraints, validation command, workloads, metric, and promotion criteria.
 3. Start an agent session in the implementation workspace.
-4. Give the agent `prompts/basic-flow.md`, filled in with the task-specific details.
+4. Give the agent `prompts/basic-flow.md`, filled in with the task-specific details; use `prompts/research-first.md` and `prompts/round-loop.md` for the extended flow.
 5. Ask the agent to write a short plan draft to `docs/draft.md` in the implementation workspace.
 6. Convert the draft into an executable plan, either manually or with a planning tool such as Humanize.
 7. Implement in small iterations, verifying after each meaningful change.
 8. Record candidates, benchmark or evaluation results, profiling evidence, and final promotion decisions.
+9. Keep the process record in `docs/process_log.md` and `runs/<run_id>/agent_trace.jsonl`.
 
 The workflow is intentionally independent of any single benchmark harness or hardware target. A downstream task can add its own evaluator, datasets, profiling tools, and domain-specific references.
+
+For the extended round flow, see `docs/round-engine.md`, `docs/evidence-model.md`, and `prompts/round-loop.md`.
 
 Validated CuTe candidates can be [exported as Hugging Face kernels](docs/huggingface-export.md).
 
@@ -82,14 +203,26 @@ Use this repository as reference material, then do implementation work elsewhere
 
 ```text
 task-workspace/
+  CLAUDE.md                # task agent instructions and skill gates
+  .claude/skills/          # installed by scripts/install_skills.py
+  contracts/
+    task.yaml
   docs/
     draft.md
     plan.md
-  runs/
-  outputs/
+    process_log.md         # overall process, reasoning, per-agent record
+    handoff.md
+    wayfinder/
+  research/
+    notes/
+  src/
+  artifacts/               # immutable candidate snapshots
+  runs/                    # one directory per measured run
   profile/
   benchmark.csv
   candidates.jsonl
+  champions.json
+  state.json
 ```
 
 The exact files can change by domain. The important rule is that the agent records enough context for another engineer to understand what was tried, what passed validation, and why the final candidate was selected.

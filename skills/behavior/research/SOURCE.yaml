@@ -1,0 +1,8 @@
+name: research
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Output findings to research/notes/<topic>.md. Cite primary sources. No issue tracker.

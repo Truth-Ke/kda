@@ -1,0 +1,8 @@
+name: implement
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Tickets live in .scratch/tickets/. The task contract wins over skill advice. Commit only when the user asks.

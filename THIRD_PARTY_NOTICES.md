@@ -33,6 +33,52 @@ below covers all 89 bundles in the distributed checkout.
 - Copyright: Copyright (c) 2026 hanlab
 - License text: [`third_party_licenses/MIT-hanlab.txt`](third_party_licenses/MIT-hanlab.txt)
 
+## Vendored Skills
+
+These skills are copied into `skills/` and are not covered by the first-party
+license. Each directory keeps its own `LICENSE`, `SOURCE.yaml`, and
+`ADAPTATION.md`.
+
+### Matt Pocock skills
+
+- Paths: `skills/behavior/`
+- Source: <https://github.com/mattpocock/skills>
+- Pinned revision: `4ae2317ddb22b046e26455e4f9c9b3aaaf62212d`
+- License: MIT
+- Copyright: Copyright (c) 2026 Matt Pocock
+- License text: [`third_party_licenses/MIT-matt-pocock-skills.txt`](third_party_licenses/MIT-matt-pocock-skills.txt)
+
+### NVIDIA TensorRT-LLM skills
+
+- Paths: `skills/kernel/triton-writing`, `skills/kernel/cute-writing`,
+  `skills/kernel/perf-casebook`
+- Source: <https://github.com/NVIDIA/TensorRT-LLM>
+- Pinned revision: `00b59a491841aa72b5d704d2b5f709f13a846277`
+- License: Apache-2.0
+- Copyright: Copyright (c) 2011-2026 NVIDIA CORPORATION & AFFILIATES
+- License text: [`third_party_licenses/Apache-2.0-TensorRT-LLM.txt`](third_party_licenses/Apache-2.0-TensorRT-LLM.txt)
+
+### Hugging Face Triton kernels skill
+
+- Path: `skills/kernel/triton-kernels`
+- Source: <https://github.com/huggingface/kernels>
+- Pinned revision: `32b3dc8cea813b011885fa656121fe8d9c8415ea`
+- License: Apache-2.0
+- License text: [`third_party_licenses/Apache-2.0-HuggingFace-kernels.txt`](third_party_licenses/Apache-2.0-HuggingFace-kernels.txt)
+
+### Academic Research Skills deep-research
+
+- Path: `skills/research/deep-research`
+- Source: <https://github.com/Imbad0202/academic-research-skills>
+- Version: `3.24.1`
+- License: **CC BY-NC 4.0** (non-commercial)
+- Copyright: Copyright 2026 Cheng-I Wu
+- License text: [`third_party_licenses/CC-BY-NC-4.0-academic-research-skills.txt`](third_party_licenses/CC-BY-NC-4.0-academic-research-skills.txt)
+
+This component carries a non-commercial restriction and is not covered by
+KDA's first-party license. Downstream distributors must preserve its license
+and attribution, and must not represent it as Apache-2.0 or CC-BY-4.0.
+
 ## KernelWiki Artifact Components
 
 | Upstream component | Bundles | Distributed terms | License text |

@@ -1,0 +1,8 @@
+name: retro
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Retrospective targets KDA docs, prompts, scripts, and workspace conventions. Record proposals as local tickets.

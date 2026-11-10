@@ -2,6 +2,12 @@ data/
 outputs/
 runs/
 profile/
+artifacts/
+workspaces/
+.claude/skills/
+skills.lock.json
+round_ranking.json
+round_results.md
 *.ncu-rep
 *.nsys-rep
 *.sqlite

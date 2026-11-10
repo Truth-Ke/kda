@@ -1,0 +1,8 @@
+name: perf-optimization-casebook
+source: https://github.com/NVIDIA/TensorRT-LLM
+source_revision: 00b59a491841aa72b5d704d2b5f709f13a846277
+license: Apache-2.0
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Reference only. Contract oracle and measured evidence win over casebook precedent.

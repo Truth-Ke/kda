@@ -1,0 +1,8 @@
+name: codebase-design
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Reference vocabulary for module/interface/seam decisions. The task contract and measured evidence win.

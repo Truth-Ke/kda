@@ -1,0 +1,38 @@
+contract_version: 1
+task: "{{TASK_NAME}}"
+objective: "{{OBJECTIVE}}"
+math: "<fill in the mathematical definition>"
+shapes: []
+dtypes: []
+
+validation:
+  command: "<independent oracle command>"
+  tolerance: "<per-dtype tolerance>"
+  full_workloads: []
+  partial_workloads: []
+
+metric:
+  name: latency_ms
+  direction: lower_is_better          # lower_is_better | higher_is_better
+  aggregation: geomean                # mean | median | geomean | min | max
+  repeat_aggregation: median
+  tie_threshold: 0.03
+
+measurement:
+  warmup: 2
+  repeats: 10
+  interleave: true
+  timing: "<event | cuda-graph | wall-clock>"
+  cache_state: "<cold | warm | flush>"
+
+budget:
+  mode: sota                          # sota | capped
+  unit: gpu_minutes
+  per_round: null
+  total: null
+  on_exhaustion: stop_and_handoff
+  record_usage: true
+
+baseline:
+  candidate_id: baseline
+  run_id: "<fill in after the baseline run>"

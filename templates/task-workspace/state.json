@@ -1,0 +1,17 @@
+{
+  "stage": "setup",
+  "round": 0,
+  "contract_version": 1,
+  "bottleneck": null,
+  "next_action": "fill contracts/task.yaml and run the baseline",
+  "budget_used": {
+    "wall_clock_s": 0,
+    "gpu_time_s": 0,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "cost_usd": 0
+  },
+  "open_hypotheses": [],
+  "blocked_on": [],
+  "last_verified_run_id": null
+}

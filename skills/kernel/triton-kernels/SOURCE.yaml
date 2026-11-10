@@ -1,0 +1,8 @@
+name: triton-kernels
+source: https://github.com/huggingface/kernels
+source_revision: 32b3dc8cea813b011885fa656121fe8d9c8415ea
+license: Apache-2.0
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Contiguous is not a hard constraint when the contract includes strides. Do not silently call .contiguous(). Frontmatter converted to YAML. ../rocm-kernels and ../xpu-kernels links rewritten to upstream URLs.

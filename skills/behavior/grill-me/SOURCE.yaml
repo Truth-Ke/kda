@@ -1,0 +1,9 @@
+name: grill-me
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Used to interview the user about pilot selection, executor environment,
+  budget mode, and other decisions that should not be guessed.

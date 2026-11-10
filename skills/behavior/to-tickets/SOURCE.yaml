@@ -1,0 +1,8 @@
+name: to-tickets
+source: https://github.com/mattpocock/skills
+source_revision: 4ae2317ddb22b046e26455e4f9c9b3aaaf62212d
+license: MIT
+copied_at: 2026-11-10
+adapted: true
+notes: >
+  Publish tickets to .scratch/tickets/ as local Markdown files. No issue tracker.
